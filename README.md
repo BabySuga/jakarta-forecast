@@ -1,158 +1,98 @@
-# Jakarta Weather Forecast
+# 🌤️ Cuaca Jakarta — Premium Weather Dashboard
 
-A clean, modern, and production-ready web application that displays the 5-day weather forecast for Jakarta. This project is built with vanilla HTML, CSS, and JavaScript, and uses Vite for a modern development and build setup. It focuses on clean code, maintainability, and a professional user interface.
+Dashboard cuaca premium berbasis web untuk kota Jakarta, Indonesia. Dibangun sepenuhnya dengan **HTML, CSS, dan JavaScript Vanilla** menggunakan **Vite** sebagai build tool.
 
 ![Jakarta Weather Forecast Screenshot](screenshots/screenshot.png)
 
-## Features
+---
 
-- **5-Day Forecast**: Shows the weather forecast for the next five days.
-- **Daily Summary**: Displays one representative temperature per day, preferring the forecast closest to noon.
-- **Modern Tooling**: Uses Vite for a fast development experience and optimized production builds.
-- **Dynamic UI**:
-  - Modern, responsive glassmorphism design.
-  - Loading skeletons while data is being fetched.
-  - Graceful error handling with a clear error message card.
-- **UX Enhancements**:
-  - Real-time current date and time display.
-  - Refresh button to fetch the latest data.
-  - "Last updated" timestamp.
-- **Bonus Features**:
-  - Temperature-based color indicators.
-  - Smooth fade-in animations for forecast cards.
-  - Semantic HTML and accessibility improvements.
+## ✨ Fitur Utama
 
-## Tech Stack
+- **Cuaca Real-time** — Suhu, kondisi cuaca, terasa seperti, kelembaban, angin, jarak pandang, serta waktu terbit & terbenam matahari
+- **Prakiraan 5 Hari Ke Depan** — Kartu prakiraan harian dengan ikon cuaca dinamis
+- **Grafik Suhu 5 Hari** — Visualisasi suhu maks & min menggunakan Chart.js
+- **Indeks UV** — Gauge setengah lingkaran dengan gradien warna (oranye → merah)
+- **Kualitas Udara (AQI)** — Indikator kualitas udara beserta status dan deskripsi
+- **Peringatan Dini** — Notifikasi status cuaca berbahaya
+- **Glassmorphism UI** — Desain modern dengan efek kaca, gradien, dan animasi halus
+- **Interaktif** — Hover effect terangkat pada semua card, toast notification untuk fitur WIP
+- **Real-time Clock** — Jam dan tanggal Jakarta yang terus diperbarui otomatis
 
-- **HTML5**: For the core structure and content.
-- **CSS3**: For styling, layout, and animations.
-- **JavaScript (ES6+)**: For application logic, API interaction, and DOM manipulation.
-- **Vite**: As a build tool and development server.
-- **OpenWeatherMap API**: For weather data.
+---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Markup | HTML5 Semantik |
+| Styling | CSS3 (Vanilla, Glassmorphism, Custom Properties) |
+| Logic | JavaScript ES6+ |
+| Grafik | [Chart.js](https://www.chartjs.org/) |
+| Data | [OpenWeatherMap API](https://openweathermap.org/appid) |
+| Tooling | [Vite](https://vitejs.dev/) |
+
+---
+
+## 📁 Struktur Proyek
 
 ```
-/
+jakarta-forecast/
 ├── src/
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
+│   ├── index.html       # Struktur utama dashboard
+│   ├── styles.css       # Semua styling & animasi
+│   ├── app.js           # Logic utama: fetch API, render UI
+│   └── img/
+│       └── monas-background.png
+├── .env                 # API Key (tidak di-commit)
 ├── .env.example
-├── .gitignore
 ├── package.json
-├── vite.config.js
-├── README.md
-└── screenshots/
-    └── screenshot.png
+└── vite.config.js
 ```
 
-## Setup and Installation
+---
 
-To run this project locally, follow these steps:
+## 🚀 Cara Menjalankan Lokal
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/your-username/jakarta-forecast.git
-cd jakarta-forecast
-```
-
-### 2. Install Dependencies
-
+**1. Install dependencies**
 ```bash
 npm install
 ```
 
-### 3. Configure API Key
-
-You will need an API key from [OpenWeatherMap](https://openweathermap.org/appid). Sign up for a free account and get your key.
-
-Create a `.env` file in the root of the project by copying the `.env.example` file:
-
+**2. Buat file `.env` dari contoh yang ada**
 ```bash
 cp .env.example .env
 ```
 
-Then, open the `.env` file and add your API key:
-
+**3. Isi API Key dari [OpenWeatherMap](https://openweathermap.org/appid)**
 ```
-VITE_API_KEY=YOUR_API_KEY_HERE
+VITE_API_KEY=api_key_kamu_di_sini
 ```
 
-### 4. Run Locally
-
-Start the development server:
-
+**4. Jalankan dev server**
 ```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173` (or another port if 5173 is in use).
-
-### 5. Build for Production
-
-To create an optimized build for production:
-
-```bash
-npm run build
-```
-
-The production files will be in the `dist` directory.
-
-### 6. Preview Production Build
-
-To preview the production build locally:
-
-```bash
-npm run preview
-```
-
-## Deployment
-
-This project is ready for deployment on platforms like Vercel or Netlify.
-
-### Vercel
-
-1.  Push your project to a GitHub repository.
-2.  Go to your Vercel dashboard and import the repository.
-3.  In the project settings, add the following environment variable:
-    - `VITE_API_KEY` = `YOUR_API_KEY`
-4.  Deploy. Vercel will automatically detect the Vite setup and build the project.
-
-### Netlify
-
-1.  Push your project to a GitHub repository.
-2.  Go to your Netlify dashboard and connect the GitHub repository.
-3.  Set the build command and publish directory:
-    - **Build command**: `npm run build`
-    - **Publish directory**: `dist`
-4.  Add the environment variable in the site settings:
-    - `VITE_API_KEY` = `YOUR_API_KEY`
-5.  Deploy the site.
-
-## Design Decisions
-
-### UI/UX
-
-- **Glassmorphism**: Chosen for its modern and visually appealing aesthetic. The blurred background effect provides depth and focuses the user's attention on the content.
-- **Responsiveness**: A fluid grid layout adapts well from desktop to mobile screens, ensuring a good experience on any device.
-- **Loading State**: Skeleton screens provide a better user experience than a simple spinner by giving a visual cue of the content that is about to be loaded.
-- **Error Handling**: A dedicated error card is displayed if the API call fails, providing clear feedback to the user.
-
-### Code Architecture
-
-- **Modularity**: The JavaScript code is organized into logical functions (`fetchWeatherData`, `groupForecastByDay`, `renderForecast`, etc.) for readability and maintainability.
-- **Vite**: Chosen for its fast development server and optimized build process, which are standard for modern front-end projects.
-- **Security**: The API key is loaded from environment variables (`import.meta.env.VITE_API_KEY`) to prevent it from being exposed in the client-side source code, following security best practices.
-
-### Data Processing
-
-OpenWeatherMap's free tier provides forecast data in 3-hour intervals. The logic implemented addresses this by:
-
-1.  **Grouping**: All forecast entries are grouped by their date.
-2.  **Selection**: For each day, the forecast closest to 12:00 PM is selected as the representative temperature. This provides a consistent and meaningful daily value.
+Buka `http://localhost:5173` di browser.
 
 ---
 
-This project was built to demonstrate proficiency in front-end development fundamentals, including modern tooling, deployment practices, and code quality.
+## 🔑 Environment Variable
+
+| Variable | Keterangan |
+|---|---|
+| `VITE_API_KEY` | API Key dari OpenWeatherMap (gratis) |
+
+---
+
+## 🎨 Desain & Keputusan Teknis
+
+- **Glassmorphism** — Elemen UI menggunakan `backdrop-filter: blur()` dan background semi-transparan untuk efek kaca yang elegan
+- **Warna berbasis CSS Custom Properties** — Seluruh palet warna didefinisikan di `:root` sehingga mudah dikustomisasi
+- **Chart.js** — Dipilih untuk grafik suhu karena ringan dan mudah dikonfigurasi tanpa dependensi besar
+- **Data 3-jam → Harian** — Data prakiraan OpenWeatherMap (per 3 jam) diproses dengan memilih entri paling dekat pukul 12.00 sebagai representasi harian
+- **Toast Notification** — Fitur yang belum selesai (peta cuaca, info cuaca, pencarian, setting) diberi notifikasi *"Fitur ini sedang dikerjakan"* daripada dinonaktifkan, demi UX yang lebih baik
+
+---
+
+> Dibuat dengan ☁️ sebagai proyek personal eksplorasi front-end development.
