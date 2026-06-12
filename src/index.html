@@ -1,49 +1,247 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jakarta Weather Forecast</title>
+    <title>Cuaca Jakarta - Premium Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <h1>Jakarta Weather Forecast</h1>
-                <p class="subtitle">Next 5 Days</p>
-            </div>
-            <div class="header-info">
-                <div id="current-datetime"></div>
-                <button id="refresh-btn" aria-label="Refresh weather data">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
-                </button>
-            </div>
-        </header>
-
-        <main id="forecast-container" class="forecast-container">
-            <!-- Skeleton loaders for 5 days -->
-            <div class="card skeleton"></div>
-            <div class="card skeleton"></div>
-            <div class="card skeleton"></div>
-            <div class="card skeleton"></div>
-            <div class="card skeleton"></div>
-        </main>
-
-        <div id="error-container" class="error-container" style="display: none;">
-            <div class="card error-card">
-                <h2>Oops! Something went wrong.</h2>
-                <p id="error-message">Could not fetch weather data. Please try again later.</p>
-            </div>
+    <!-- Navbar -->
+    <nav class="navbar glass-panel">
+        <div class="nav-left">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1325 20.177 10.2016 17.8546 10.0152C17.3879 6.62121 14.4752 4 11 4C7.13401 4 4 7.13401 4 11C4 11.2336 4.01141 11.4645 4.03362 11.6917C1.77747 12.1804 0 14.148 0 16.5C0 19.5376 2.46243 22 5.5 22H17.5V19Z" fill="#60A5FA" stroke="none"></path>
+            </svg>
+            <span class="brand-name">Cuaca Jakarta</span>
         </div>
+        <div class="nav-center">
+            <a href="#" class="nav-link active">Beranda</a>
+            <a href="#forecast" class="nav-link">5 Hari Ke Depan</a>
+            <a href="#" class="nav-link">Peta Cuaca</a>
+            <a href="#analytics" class="nav-link">Info Cuaca</a>
+        </div>
+        <div class="nav-right">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" placeholder="Cari kota..." disabled>
+            </div>
+            <button class="icon-btn" aria-label="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
         
+        <!-- Error Container -->
+        <div id="error-container" class="error-container glass-panel" style="display: none;">
+            <h2>Oops! Terjadi kesalahan.</h2>
+            <p id="error-message">Tidak dapat mengambil data cuaca. Silakan coba lagi.</p>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay glass-panel">
+            <div class="spinner"></div>
+            <p>Memuat data cuaca...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" style="opacity: 0;">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <!-- Background is applied via CSS -->
+                <div class="hero-bg"></div>
+                
+                <div class="hero-content">
+                    <div class="hero-left">
+                        <div class="location-header">
+                            <h1 class="city-name">Jakarta, Indonesia</h1>
+                            <svg class="pin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                        <p class="current-datetime" id="current-datetime"></p>
+                        
+                        <div class="main-weather">
+                            <div class="temp-display">
+                                <span class="temp-value" id="current-temp">--</span>
+                                <span class="temp-unit">°C</span>
+                            </div>
+                            <img id="current-icon" src="" alt="Weather Icon" class="main-weather-icon" style="display: none;">
+                        </div>
+                        
+                        <h2 class="weather-condition" id="current-condition">--</h2>
+                        <p class="weather-desc" id="current-desc">--</p>
+                        
+                        <div class="mini-cards">
+                            <div class="mini-card glass-panel">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <div>
+                                    <p class="mini-label">Terasa Seperti</p>
+                                    <p class="mini-value"><span id="current-feels-like">--</span>°C</p>
+                                </div>
+                            </div>
+                            <div class="mini-card glass-panel">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                                <div>
+                                    <p class="mini-label">Kelembaban</p>
+                                    <p class="mini-value"><span id="current-humidity-mini">--</span>%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-right">
+                        <div class="info-panel glass-panel-blue">
+                            <div class="panel-header">
+                                <h3>Informasi Cuaca</h3>
+                                <button class="refresh-btn" id="refresh-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                                </button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Angin</p>
+                                        <p class="info-value"><span id="info-wind">--</span> km/h</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Arah Angin</p>
+                                        <p class="info-value" id="info-wind-dir">--</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Jarak Pandang</p>
+                                        <p class="info-value" id="info-visibility">--</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Kelembaban</p>
+                                        <p class="info-value"><span id="info-humidity">--</span>%</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="2" x2="12" y2="9"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="8 6 12 2 16 6"></polyline></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Matahari Terbit</p>
+                                        <p class="info-value" id="info-sunrise">--</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="9" x2="12" y2="2"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="16 5 12 9 8 5"></polyline></svg></div>
+                                    <div class="info-text">
+                                        <p class="info-label">Matahari Terbenam</p>
+                                        <p class="info-value" id="info-sunset">--</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5 Day Forecast -->
+            <section id="forecast" class="forecast-section">
+                <div class="section-header">
+                    <h2>Prakiraan 5 Hari Ke Depan</h2>
+                    <a href="#" class="view-all">Lihat detail lengkap &rarr;</a>
+                </div>
+                <div class="forecast-row" id="forecast-container">
+                    <!-- Cards injected by JS -->
+                </div>
+            </section>
+
+            <!-- Analytics Dashboard -->
+            <section id="analytics" class="analytics-section">
+                <div class="analytics-grid">
+                    <!-- Widget 1: Temp Trend -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Grafik Suhu 5 Hari</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tempChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: UV Index -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Indeks UV</h3>
+                        </div>
+                        <div class="widget-content uv-widget">
+                            <div class="uv-gauge">
+                                <svg viewBox="0 0 100 50" class="gauge-svg">
+                                    <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="10" stroke-linecap="round"/>
+                                    <!-- Dynamic path for actual value injected via JS if needed, or CSS. 
+                                         For this mock, we'll just style a static fill. -->
+                                    <path id="uv-gauge-fill" d="M 10 50 A 40 40 0 0 1 70 20" fill="none" stroke="#F59E0B" stroke-width="10" stroke-linecap="round" />
+                                </svg>
+                                <div class="uv-value" id="uv-value">7</div>
+                            </div>
+                            <div class="uv-info">
+                                <h4 class="risk-level" id="uv-risk">Tinggi</h4>
+                                <p class="uv-desc" id="uv-desc">Gunakan tabir surya dan kacamata hitam saat beraktivitas di luar.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 3: Air Quality -->
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <h3>Kualitas Udara</h3>
+                        </div>
+                        <div class="widget-content aqi-widget">
+                            <div class="aqi-header">
+                                <div class="aqi-icon success-color">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="aqi-value" id="aqi-value">42</div>
+                                    <div class="aqi-status" id="aqi-status">Baik</div>
+                                </div>
+                            </div>
+                            <p class="aqi-desc" id="aqi-desc">Udara segar dan tidak berisiko untuk aktivitas luar ruangan.</p>
+                            <p class="aqi-source">AQI (US)</p>
+                        </div>
+                    </div>
+
+                    <!-- Widget 4: Weather Alerts -->
+                    <div class="widget-card alert-widget">
+                        <div class="widget-header">
+                            <h3>Peringatan Dini</h3>
+                        </div>
+                        <div class="widget-content alert-content">
+                            <div class="alert-icon success-color">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <h4 id="alert-title">Tidak ada peringatan dini</h4>
+                            <p id="alert-desc">Cuaca aman untuk beraktivitas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
         <footer>
-            <p>Last updated: <span id="last-updated">N/A</span></p>
+            <p>Data diperbarui: <span id="last-updated">N/A</span> • Sumber: BMKG & OpenWeather</p>
         </footer>
     </div>
+    
+    <!-- Scripts -->
     <script type="module" src="/app.js"></script>
 </body>
 </html>

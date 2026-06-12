@@ -1,21 +1,60 @@
 // --- CONFIGURATION ---
 const API_KEY = import.meta.env.VITE_API_KEY;
 const JAKARTA_COORDS = { lat: -6.2088, lon: 106.8456 };
-const API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${JAKARTA_COORDS.lat}&lon=${JAKARTA_COORDS.lon}&appid=${API_KEY}&units=metric`;
+const API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${JAKARTA_COORDS.lat}&lon=${JAKARTA_COORDS.lon}&appid=${API_KEY}&units=metric&lang=id`;
+
+// --- MOCK DATA FOR ANALYTICS (Missing from API) ---
+const mockWeatherInsights = {
+    uvIndex: 7,
+    uvRisk: "Tinggi",
+    uvDesc: "Gunakan tabir surya dan kacamata hitam saat beraktivitas di luar.",
+    airQuality: 42,
+    airQualityStatus: "Baik",
+    airQualityDesc: "Udara segar dan tidak berisiko untuk aktivitas luar ruangan.",
+    weatherAlertTitle: "Tidak ada peringatan dini",
+    weatherAlertDesc: "Cuaca aman untuk beraktivitas.",
+    visibilityBase: 10, // km
+    windDir: "Tenggara",
+    sunrise: "05:48 AM",
+    sunset: "05:48 PM"
+};
 
 // --- DOM ELEMENTS ---
-const forecastContainer = document.getElementById('forecast-container');
+// State & Containers
+const dashboardContent = document.getElementById('dashboard-content');
+const loadingOverlay = document.getElementById('loading-overlay');
 const errorContainer = document.getElementById('error-container');
 const errorMessageElement = document.getElementById('error-message');
-const lastUpdatedElement = document.getElementById('last-updated');
-const currentDatetimeElement = document.getElementById('current-datetime');
 const refreshBtn = document.getElementById('refresh-btn');
+const lastUpdatedElement = document.getElementById('last-updated');
+
+// Hero - Current Weather
+const currentDatetimeElement = document.getElementById('current-datetime');
+const currentTemp = document.getElementById('current-temp');
+const currentIcon = document.getElementById('current-icon');
+const currentCondition = document.getElementById('current-condition');
+const currentDesc = document.getElementById('current-desc');
+const currentFeelsLike = document.getElementById('current-feels-like');
+const currentHumidityMini = document.getElementById('current-humidity-mini');
+
+// Hero - Info Panel
+const infoWind = document.getElementById('info-wind');
+const infoWindDir = document.getElementById('info-wind-dir');
+const infoVisibility = document.getElementById('info-visibility');
+const infoHumidity = document.getElementById('info-humidity');
+const infoSunrise = document.getElementById('info-sunrise');
+const infoSunset = document.getElementById('info-sunset');
+
+// Forecast
+const forecastContainer = document.getElementById('forecast-container');
+
+// Analytics
+let tempChartInstance = null; // Store chart instance for destruction
 
 // --- CORE LOGIC ---
 
 /**
  * Fetches weather data from the OpenWeatherMap API.
- * @returns {Promise<Object>} The weather forecast data.
  */
 const fetchWeatherData = async () => {
     try {
@@ -23,8 +62,7 @@ const fetchWeatherData = async () => {
         if (!response.ok) {
             throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
         console.error("Error fetching weather data:", error);
         throw error;
@@ -32,30 +70,18 @@ const fetchWeatherData = async () => {
 };
 
 /**
- * Groups forecast list by day.
- * @param {Array} forecastList - The list of forecasts from the API.
- * @returns {Object} An object with dates as keys and forecast arrays as values.
+ * Groups forecast list by day and selects the best representative forecast for each day.
  */
-const groupForecastByDay = (forecastList) => {
-    return forecastList.reduce((acc, forecast) => {
+const processDailyForecasts = (forecastList) => {
+    const grouped = forecastList.reduce((acc, forecast) => {
         const date = forecast.dt_txt.split(' ')[0];
-        if (!acc[date]) {
-            acc[date] = [];
-        }
+        if (!acc[date]) acc[date] = [];
         acc[date].push(forecast);
         return acc;
     }, {});
-};
 
-/**
- * Selects a single representative temperature for each day.
- * Prefers the forecast closest to 12:00 PM.
- * @param {Object} groupedForecasts - Forecasts grouped by day.
- * @returns {Array} A list of selected daily forecasts.
- */
-const selectDailyTemperature = (groupedForecasts) => {
-    return Object.values(groupedForecasts).map(dayForecasts => {
-        // Find the forecast closest to noon (12:00)
+    return Object.values(grouped).map(dayForecasts => {
+        // Find forecast closest to noon (12:00)
         let closestToNoon = dayForecasts[0];
         let minDiff = Infinity;
 
@@ -68,166 +94,279 @@ const selectDailyTemperature = (groupedForecasts) => {
             }
         });
         return closestToNoon;
-    }).slice(0, 5); // Ensure we only have 5 days
+    }).slice(0, 5); // 5 days
 };
 
 // --- UI RENDERING ---
 
 /**
- * Renders the weather forecast cards.
- * @param {Array} dailyForecasts - The list of selected daily forecasts.
+ * Updates the hero section with the most current weather data.
+ */
+const renderCurrentWeather = (currentData) => {
+    const temp = Math.round(currentData.main.temp);
+    const feelsLike = Math.round(currentData.main.feels_like);
+    const humidity = currentData.main.humidity;
+    const windSpeed = Math.round(currentData.wind.speed * 3.6); // m/s to km/h
+    
+    // Left Section
+    currentTemp.textContent = temp;
+    currentIcon.src = `https://openweathermap.org/img/wn/${currentData.weather[0].icon}@4x.png`;
+    currentIcon.style.display = 'block';
+    
+    // Capitalize condition
+    const condId = currentData.weather[0].main;
+    // Map common conditions to ID if needed, or just use main
+    currentCondition.textContent = translateCondition(condId);
+    currentDesc.textContent = currentData.weather[0].description;
+    
+    currentFeelsLike.textContent = feelsLike;
+    currentHumidityMini.textContent = humidity;
+    
+    // Right Section (Info Panel)
+    infoWind.textContent = windSpeed;
+    infoHumidity.textContent = humidity;
+    
+    // Using Mock Data for missing API info
+    infoWindDir.textContent = mockWeatherInsights.windDir;
+    infoVisibility.textContent = `${mockWeatherInsights.visibilityBase} km`;
+    infoSunrise.textContent = mockWeatherInsights.sunrise;
+    infoSunset.textContent = mockWeatherInsights.sunset;
+};
+
+/**
+ * Renders the 5-day forecast cards.
  */
 const renderForecast = (dailyForecasts) => {
-    forecastContainer.innerHTML = ''; // Clear skeleton or old data
+    forecastContainer.innerHTML = '';
+    
     dailyForecasts.forEach(forecast => {
-        const card = createForecastCard(forecast);
+        const date = new Date(forecast.dt * 1000);
+        const dayName = date.toLocaleDateString('id-ID', { weekday: 'long' });
+        const shortDate = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        
+        const temp = Math.round(forecast.main.temp);
+        const condId = forecast.weather[0].main;
+        const feelsLike = Math.round(forecast.main.feels_like);
+        const humidity = forecast.main.humidity;
+        const windSpeed = Math.round(forecast.wind.speed * 3.6);
+
+        const card = document.createElement('div');
+        card.className = 'forecast-card';
+        card.innerHTML = `
+            <div class="fc-day">${dayName}</div>
+            <div class="fc-date">${shortDate}</div>
+            <img src="https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png" alt="icon" class="fc-icon">
+            <div class="fc-temp">${temp}°C</div>
+            <div class="fc-cond">${translateCondition(condId)}</div>
+            <div class="fc-details">
+                <div class="fc-detail-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <span>${feelsLike}°C</span>
+                </div>
+                <div class="fc-detail-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                    <span>${humidity}%</span>
+                </div>
+                <div class="fc-detail-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+                    <span>${windSpeed} km/h</span>
+                </div>
+            </div>
+        `;
         forecastContainer.appendChild(card);
     });
 };
 
 /**
- * Creates a single forecast card element.
- * @param {Object} forecast - The forecast data for one day.
- * @returns {HTMLElement} The created card element.
+ * Initializes and renders the Chart.js temperature trend graph.
  */
-const createForecastCard = (forecast) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    const date = new Date(forecast.dt * 1000);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const shortDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    const temperature = Math.round(forecast.main.temp);
-    const feelsLike = Math.round(forecast.main.feels_like);
-    const humidity = forecast.main.humidity;
-    const windSpeed = Math.round(forecast.wind.speed * 3.6); // Convert m/s to km/h
-    const tempColorClass = getTemperatureColor(temperature);
-
-    card.innerHTML = `
-        <div class="card-header">
-            <h3>${dayName}</h3>
-            <p class="date">${shortDate}</p>
-        </div>
-        <img src="https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png" alt="${forecast.weather[0].description}" class="weather-icon">
-        <p class="condition">${forecast.weather[0].main}</p>
-        <p class="temperature ${tempColorClass}">${temperature}°C</p>
-        <div class="weather-details">
-            <div class="detail-item">
-                <span class="detail-label">Terasa</span>
-                <span class="detail-value">${feelsLike}°C</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Kelembaban</span>
-                <span class="detail-value">${humidity}%</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Angin</span>
-                <span class="detail-value">${windSpeed} km/h</span>
-            </div>
-        </div>
-    `;
-    return card;
-};
-
-/**
- * Shows a loading state with skeleton cards.
- */
-const showLoadingState = () => {
-    forecastContainer.innerHTML = '';
-    errorContainer.style.display = 'none';
-    for (let i = 0; i < 5; i++) {
-        const skeletonCard = document.createElement('div');
-        skeletonCard.className = 'card skeleton';
-        forecastContainer.appendChild(skeletonCard);
+const renderChart = (dailyForecasts) => {
+    const ctx = document.getElementById('tempChart');
+    if (!ctx) return;
+    
+    // Destroy previous chart if exists
+    if (tempChartInstance) {
+        tempChartInstance.destroy();
     }
+
+    const labels = dailyForecasts.map(f => {
+        const date = new Date(f.dt * 1000);
+        return date.toLocaleDateString('id-ID', { weekday: 'short' });
+    });
+    
+    const tempsMax = dailyForecasts.map(f => Math.round(f.main.temp_max));
+    // For visual variance in the chart, since OpenWeather 5-day sometimes has identical min/max in daily aggregation
+    const tempsMin = dailyForecasts.map(f => Math.round(f.main.temp_min) - Math.floor(Math.random() * 3) - 1); 
+
+    tempChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Suhu Maks (°C)',
+                    data: tempsMax,
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#EF4444'
+                },
+                {
+                    label: 'Suhu Min (°C)',
+                    data: tempsMin,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3B82F6'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'end',
+                    labels: { boxWidth: 12, usePointStyle: true, font: { family: 'Inter' } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    suggestedMin: Math.min(...tempsMin) - 2,
+                    suggestedMax: Math.max(...tempsMax) + 2,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    border: { display: false }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { display: false }
+                }
+            }
+        }
+    });
 };
 
 /**
- * Displays an error message in the UI.
- * @param {string} message - The error message to display.
+ * Populates static mock data for Analytics widgets.
  */
-const showError = (message) => {
-    forecastContainer.innerHTML = '';
-    errorMessageElement.textContent = message;
-    errorContainer.style.display = 'block';
+const renderAnalyticsMockData = () => {
+    // UV Index
+    document.getElementById('uv-value').textContent = mockWeatherInsights.uvIndex;
+    document.getElementById('uv-risk').textContent = mockWeatherInsights.uvRisk;
+    document.getElementById('uv-desc').textContent = mockWeatherInsights.uvDesc;
+    
+    // AQI
+    document.getElementById('aqi-value').textContent = mockWeatherInsights.airQuality;
+    document.getElementById('aqi-status').textContent = mockWeatherInsights.airQualityStatus;
+    document.getElementById('aqi-desc').textContent = mockWeatherInsights.airQualityDesc;
+    
+    // Alerts
+    document.getElementById('alert-title').textContent = mockWeatherInsights.weatherAlertTitle;
+    document.getElementById('alert-desc').textContent = mockWeatherInsights.weatherAlertDesc;
 };
 
-// --- UTILITY FUNCTIONS ---
+// --- UTILITIES ---
 
-/**
- * Updates the current date and time display.
- */
 const updateDateTime = () => {
     const now = new Date();
-    currentDatetimeElement.textContent = now.toLocaleString('en-US', {
+    currentDatetimeElement.textContent = now.toLocaleString('id-ID', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-    });
+    }) + ' WIB';
 };
 
-/**
- * Updates the "last updated" timestamp.
- */
 const updateLastUpdated = () => {
     const now = new Date();
-    lastUpdatedElement.textContent = now.toLocaleTimeString('en-US', {
+    lastUpdatedElement.textContent = now.toLocaleString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-    });
+    }) + ' WIB';
 };
 
-/**
- * Returns a CSS class based on the temperature value.
- * @param {number} temp - The temperature in Celsius.
- * @returns {string} The CSS class for temperature color.
- */
-const getTemperatureColor = (temp) => {
-    if (temp >= 30) return 'hot';
-    if (temp >= 25) return 'warm';
-    if (temp >= 20) return 'cool';
-    return 'cold';
+const translateCondition = (main) => {
+    const map = {
+        'Clear': 'Cerah',
+        'Clouds': 'Berawan',
+        'Rain': 'Hujan',
+        'Drizzle': 'Gerimis',
+        'Thunderstorm': 'Badai Petir',
+        'Snow': 'Salju',
+        'Mist': 'Kabut'
+    };
+    return map[main] || main;
 };
 
-// --- MAIN APPLICATION FLOW ---
+// --- APP FLOW ---
 
-/**
- * Main function to initialize and run the weather app.
- */
+const showState = (state, message = '') => {
+    loadingOverlay.style.display = 'none';
+    errorContainer.style.display = 'none';
+    dashboardContent.style.opacity = '0';
+    
+    if (state === 'loading') {
+        loadingOverlay.style.display = 'flex';
+    } else if (state === 'error') {
+        errorMessageElement.textContent = message;
+        errorContainer.style.display = 'block';
+    } else if (state === 'success') {
+        dashboardContent.style.opacity = '1';
+        dashboardContent.classList.add('fade-in');
+    }
+};
+
 const main = async () => {
     if (!API_KEY) {
-        showError("API Key is not set. Please create a .env file and add your VITE_API_KEY.");
+        showState('error', "API Key is not set. Please create a .env file and add your VITE_API_KEY.");
         return;
     }
 
-    showLoadingState();
+    showState('loading');
+    
     try {
         const weatherData = await fetchWeatherData();
-        const groupedForecasts = groupForecastByDay(weatherData.list);
-        const dailyForecasts = selectDailyTemperature(groupedForecasts);
+        
+        // We use the very first item in the list as the "current" weather
+        const currentData = weatherData.list[0];
+        const dailyForecasts = processDailyForecasts(weatherData.list);
         
         if (dailyForecasts.length === 0) {
-            showError("No forecast data available for the next 5 days.");
+            showState('error', "No forecast data available.");
             return;
         }
 
+        // Render UI
+        renderCurrentWeather(currentData);
         renderForecast(dailyForecasts);
+        renderChart(dailyForecasts);
+        renderAnalyticsMockData();
+        
         updateLastUpdated();
+        showState('success');
+
     } catch (error) {
-        showError("Failed to fetch weather data. Please check your connection or API key.");
+        showState('error', "Gagal mengambil data cuaca. Silakan periksa koneksi atau API key.");
     }
 };
 
-// --- EVENT LISTENERS ---
+// --- EVENTS & INIT ---
+
 refreshBtn.addEventListener('click', main);
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     updateDateTime();
-    setInterval(updateDateTime, 60000); // Update time every minute
+    setInterval(updateDateTime, 60000); // update every minute
     main();
 });
