@@ -1,7 +1,7 @@
 :root {
     --background-start: #89f7fe;
     --background-end: #66a6ff;
-    --card-bg: rgba(255, 255, 255, 0.2);
+    --card-bg: rgba(255, 255, 255, 0.15);
     --text-color: #333;
     --text-color-light: #555;
     --shadow-color: rgba(0, 0, 0, 0.1);
@@ -31,7 +31,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -42,6 +42,7 @@ header {
     margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
+    width: 100%;
 }
 
 .header-content h1 {
@@ -101,52 +102,119 @@ header {
 
 .forecast-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(5, 1fr);
     gap: 1.5rem;
+    width: 100%;
 }
 
 .card {
     background: var(--card-bg);
-    border-radius: 15px;
+    border-radius: 20px;
     padding: 1.5rem;
     text-align: center;
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     box-shadow: 0 8px 32px 0 var(--shadow-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
     opacity: 0;
     animation: fadeIn 0.5s forwards, float 6s ease-in-out infinite;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 420px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+    pointer-events: none;
+}
+
+.card:hover::before {
+    left: 100%;
 }
 
 .card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 40px 0 var(--hover-shadow-color);
+    transform: translateY(-12px);
+    box-shadow: 0 12px 45px 0 var(--hover-shadow-color);
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+}
+
+.card-header {
+    margin-bottom: 0.5rem;
 }
 
 .card h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.2rem;
-    font-weight: 500;
+    margin: 0 0 0.25rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .card .weather-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0.5rem auto;
+    width: 90px;
+    height: 90px;
+    margin: 0.75rem auto 0.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.card:hover .weather-icon {
+    transform: scale(1.1);
 }
 
 .card .condition {
-    margin: 0.5rem 0 1rem;
+    margin: 0.5rem 0 0.75rem;
     font-size: 1rem;
     text-transform: capitalize;
-    font-weight: 500;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .card .temperature {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 700;
-    margin: 0;
+    margin: 0.5rem 0;
     position: relative;
+}
+
+.weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .temperature.hot { color: var(--hot-color); }
@@ -155,7 +223,7 @@ header {
 .temperature.cold { color: var(--cold-color); }
 
 .skeleton {
-    height: 280px;
+    height: 420px;
     position: relative;
     overflow: hidden;
 }
@@ -167,7 +235,7 @@ header {
     left: -150%;
     width: 150%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
     animation: loading 1.5s infinite;
 }
 
@@ -241,6 +309,25 @@ footer {
 	}
 }
 
+@media (max-width: 1400px) {
+    .forecast-container {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .forecast-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .forecast-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     body {
         padding: 1rem;
@@ -249,18 +336,23 @@ footer {
         font-size: 2rem;
     }
     .forecast-container {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
     .card {
         padding: 1rem;
+        min-height: 380px;
     }
     .card .temperature {
-        font-size: 2rem;
+        font-size: 2.2rem;
     }
     .card .weather-icon {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
+    }
+    .weather-details {
+        gap: 0.3rem;
+        padding-top: 0.75rem;
     }
 }
 
@@ -271,5 +363,26 @@ footer {
     }
     .forecast-container {
         grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    .card {
+        min-height: auto;
+        padding: 0.75rem;
+    }
+    .card h3 {
+        font-size: 1rem;
+    }
+    .card .temperature {
+        font-size: 1.8rem;
+    }
+    .card .weather-icon {
+        width: 60px;
+        height: 60px;
+    }
+    .detail-label {
+        font-size: 0.65rem;
+    }
+    .detail-value {
+        font-size: 0.85rem;
     }
 }

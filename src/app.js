@@ -95,18 +95,37 @@ const createForecastCard = (forecast) => {
     card.className = 'card';
 
     const date = new Date(forecast.dt * 1000);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     const shortDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     const temperature = Math.round(forecast.main.temp);
+    const feelsLike = Math.round(forecast.main.feels_like);
+    const humidity = forecast.main.humidity;
+    const windSpeed = Math.round(forecast.wind.speed * 3.6); // Convert m/s to km/h
     const tempColorClass = getTemperatureColor(temperature);
 
     card.innerHTML = `
-        <h3>${dayName}</h3>
-        <p class="date">${shortDate}</p>
+        <div class="card-header">
+            <h3>${dayName}</h3>
+            <p class="date">${shortDate}</p>
+        </div>
         <img src="https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png" alt="${forecast.weather[0].description}" class="weather-icon">
         <p class="condition">${forecast.weather[0].main}</p>
         <p class="temperature ${tempColorClass}">${temperature}°C</p>
+        <div class="weather-details">
+            <div class="detail-item">
+                <span class="detail-label">Terasa</span>
+                <span class="detail-value">${feelsLike}°C</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Kelembaban</span>
+                <span class="detail-value">${humidity}%</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Angin</span>
+                <span class="detail-value">${windSpeed} km/h</span>
+            </div>
+        </div>
     `;
     return card;
 };
