@@ -22,16 +22,15 @@
         </div>
         <div class="nav-center">
             <a href="#" class="nav-link active">Beranda</a>
-            <a href="#forecast" class="nav-link">5 Hari Ke Depan</a>
-            <a href="#" class="nav-link">Peta Cuaca</a>
-            <a href="#analytics" class="nav-link">Info Cuaca</a>
+            <a href="#" class="nav-link wip-feature">Peta Cuaca</a>
+            <a href="#" class="nav-link wip-feature">Info Cuaca</a>
         </div>
         <div class="nav-right">
             <div class="search-box">
                 <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" placeholder="Cari kota..." disabled>
+                <input type="text" class="wip-feature" placeholder="Cari kota..." readonly style="cursor: pointer;">
             </div>
-            <button class="icon-btn" aria-label="Settings">
+            <button class="icon-btn wip-feature" aria-label="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
         </div>
@@ -80,7 +79,7 @@
                         
                         <div class="mini-cards">
                             <div class="mini-card glass-panel">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
                                 <div>
                                     <p class="mini-label">Terasa Seperti</p>
                                     <p class="mini-value"><span id="current-feels-like">--</span>°C</p>
@@ -157,7 +156,7 @@
             <section id="forecast" class="forecast-section">
                 <div class="section-header">
                     <h2>Prakiraan 5 Hari Ke Depan</h2>
-                    <a href="#" class="view-all">Lihat detail lengkap &rarr;</a>
+                    <a href="#" class="view-all wip-feature">Lihat detail lengkap &rarr;</a>
                 </div>
                 <div class="forecast-row" id="forecast-container">
                     <!-- Cards injected by JS -->

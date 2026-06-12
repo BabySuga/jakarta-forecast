@@ -137,6 +137,7 @@ const renderCurrentWeather = (currentData) => {
  * Renders the 5-day forecast cards.
  */
 const renderForecast = (dailyForecasts) => {
+    if (!forecastContainer) return;
     forecastContainer.innerHTML = '';
     
     dailyForecasts.forEach(forecast => {
@@ -364,6 +365,24 @@ const main = async () => {
 // --- EVENTS & INIT ---
 
 refreshBtn.addEventListener('click', main);
+
+// Custom Toast Notification for WIP Features
+const toast = document.createElement('div');
+toast.className = 'toast-notification';
+toast.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Fitur ini sedang dikerjakan`;
+document.body.appendChild(toast);
+
+let toastTimeout;
+document.querySelectorAll('.wip-feature').forEach(el => {
+    el.addEventListener('click', (e) => {
+        e.preventDefault();
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     updateDateTime();

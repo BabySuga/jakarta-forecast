@@ -308,7 +308,7 @@ body {
 .aqi-value { font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--text-main); }
 .aqi-status { font-weight: 600; font-size: 0.9rem; color: var(--text-main); margin-top: 4px; }
 .aqi-desc { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.3; text-align: center; }
-.aqi-source { font-size: 0.7rem; color: var(--text-muted); margin-top: auto; text-align: center; }
+.aqi-source { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; text-align: center; }
 
 /* Alert Widget */
 .alert-widget { background: var(--white); }
@@ -334,6 +334,32 @@ footer { display: none; }
     border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- TOAST NOTIFICATION --- */
+.toast-notification {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text-main);
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 9999;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1400px) { .analytics-grid { grid-template-columns: 1fr 1fr; } }
