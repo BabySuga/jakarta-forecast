@@ -186,8 +186,15 @@
                             <div class="uv-top-row">
                                 <div class="uv-gauge">
                                     <svg viewBox="0 0 100 50" class="gauge-svg">
-                                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="10" stroke-linecap="round"/>
-                                        <path id="uv-gauge-fill" d="M 10 50 A 40 40 0 0 1 70 20" fill="none" stroke="#F59E0B" stroke-width="10" stroke-linecap="round" />
+                                        <defs>
+                                            <linearGradient id="uvGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#FDBA74" />
+                                                <stop offset="50%" stop-color="#F97316" />
+                                                <stop offset="100%" stop-color="#EF4444" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#F1F5F9" stroke-width="10" stroke-linecap="round"/>
+                                        <path id="uv-gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#uvGradient)" stroke-width="10" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="30" />
                                     </svg>
                                     <div class="uv-value" id="uv-value">7</div>
                                 </div>
