@@ -180,6 +180,11 @@ const getTemperatureColor = (temp) => {
  * Main function to initialize and run the weather app.
  */
 const main = async () => {
+    if (!API_KEY) {
+        showError("API Key is not set. Please create a .env file and add your VITE_API_KEY.");
+        return;
+    }
+
     showLoadingState();
     try {
         const weatherData = await fetchWeatherData();
